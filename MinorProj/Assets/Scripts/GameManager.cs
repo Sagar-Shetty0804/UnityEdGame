@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +27,13 @@ public class GameManager : MonoBehaviour
     public bool gameOver = false;
     
     private int score = 0;
+    
+    // Enhanced equation system for long equations
+    private List<int> selectedNumbers = new List<int>();
+    private List<string> selectedOperators = new List<string>();
+    private bool isLongEquationMode = false;
+    
+    // Legacy system for backward compatibility
     private int firstNumber = 0;
     private int secondNumber = 0;
     private string selectedOperator = "";
@@ -37,11 +45,26 @@ public class GameManager : MonoBehaviour
     
     public static GameManager Instance;
     
-    // Properties for other scripts to access
-    public bool HasValidSelection => hasFirstNumber && hasSecondNumber && hasSelectedOperator;
-    public int FirstNumber => firstNumber;
-    public int SecondNumber => secondNumber;
-    public string SelectedOperator => selectedOperator;
+    // Properties for other scripts to access - enhanced for long equations
+    public bool HasValidSelection 
+    { 
+        get 
+        {
+            if (isLongEquationMode)
+            {
+                return selectedNumbers.Count >= 2 && selectedOperators.Count >= 1 && 
+                       selectedNumbers.Count == selectedOperators.Count + 1;
+            }
+            else
+            {
+                return hasFirstNumber && hasSecondNumber && hasSelectedOperator;
+            }
+        }
+    }
+    
+    public int FirstNumber => isLongEquationMode ? (selectedNumbers.Count > 0 ? selectedNumbers[0] : 0) : firstNumber;
+    public int SecondNumber => isLongEquationMode ? (selectedNumbers.Count > 1 ? selectedNumbers[1] : 0) : secondNumber;
+    public string SelectedOperator => isLongEquationMode ? (selectedOperators.Count > 0 ? selectedOperators[0] : "") : selectedOperator;
     
     void Awake()
     {
@@ -61,6 +84,7 @@ public class GameManager : MonoBehaviour
         InitializeHearts();
         UpdateUI();
         UpdateSelectionDisplay();
+        UpdateSettingsBasedValues();
         
         // Make sure red flash starts invisible
         if (redFlashOverlay != null)
@@ -69,6 +93,28 @@ public class GameManager : MonoBehaviour
             flashColor.a = 0;
             redFlashOverlay.color = flashColor;
             redFlashOverlay.gameObject.SetActive(true); // Make sure it's active
+        }
+    }
+
+    void Update()
+    {
+        // Check for settings changes every frame
+        UpdateSettingsBasedValues();
+    }
+
+    void UpdateSettingsBasedValues()
+    {
+        if (SettingsManager.Instance != null)
+        {
+            // Update long equation mode
+            bool newLongEquationMode = SettingsManager.Instance.IsLongEquationEnabled();
+            if (newLongEquationMode != isLongEquationMode)
+            {
+                isLongEquationMode = newLongEquationMode;
+                ResetSelection(); // Reset when mode changes
+                UpdateSelectionDisplay();
+                Debug.Log($"Long equation mode: {isLongEquationMode}");
+            }
         }
     }
 
@@ -169,24 +215,34 @@ public class GameManager : MonoBehaviour
     
     public void SelectNumber(int number)
     {
-        if (!hasFirstNumber)
+        if (isLongEquationMode)
         {
-            firstNumber = number;
-            hasFirstNumber = true;
-            Debug.Log($"Selected first number: {number}");
-        }
-        else if (!hasSecondNumber)
-        {
-            secondNumber = number;
-            hasSecondNumber = true;
-            Debug.Log($"Selected second number: {number}");
+            // Long equation mode: can add unlimited numbers
+            selectedNumbers.Add(number);
+            Debug.Log($"Added number to long equation: {number} (Total numbers: {selectedNumbers.Count})");
         }
         else
         {
-            // If both numbers are selected, replace the first one and shift
-            firstNumber = secondNumber;
-            secondNumber = number;
-            Debug.Log($"Replaced numbers - First: {firstNumber}, Second: {number}");
+            // Original logic for simple equations
+            if (!hasFirstNumber)
+            {
+                firstNumber = number;
+                hasFirstNumber = true;
+                Debug.Log($"Selected first number: {number}");
+            }
+            else if (!hasSecondNumber)
+            {
+                secondNumber = number;
+                hasSecondNumber = true;
+                Debug.Log($"Selected second number: {number}");
+            }
+            else
+            {
+                // If both numbers are selected, replace the first one and shift
+                firstNumber = secondNumber;
+                secondNumber = number;
+                Debug.Log($"Replaced numbers - First: {firstNumber}, Second: {number}");
+            }
         }
         
         UpdateSelectionDisplay();
@@ -195,9 +251,27 @@ public class GameManager : MonoBehaviour
     
     public void SelectOperator(string op)
     {
-        selectedOperator = op;
-        hasSelectedOperator = true;
-        Debug.Log($"Selected operator: {op}");
+        if (isLongEquationMode)
+        {
+            // Long equation mode: can add operators if we have at least one number
+            if (selectedNumbers.Count > selectedOperators.Count)
+            {
+                selectedOperators.Add(op);
+                Debug.Log($"Added operator to long equation: {op} (Total operators: {selectedOperators.Count})");
+            }
+            else
+            {
+                Debug.Log("Cannot add operator: need a number first!");
+            }
+        }
+        else
+        {
+            // Original logic
+            selectedOperator = op;
+            hasSelectedOperator = true;
+            Debug.Log($"Selected operator: {op}");
+        }
+        
         UpdateSelectionDisplay();
         CheckForValidEquation();
     }
@@ -208,26 +282,55 @@ public class GameManager : MonoBehaviour
         {
             string display = "";
 
-            if (hasFirstNumber)
-                display += firstNumber.ToString();
+            if (isLongEquationMode)
+            {
+                // Display long equation
+                for (int i = 0; i < selectedNumbers.Count; i++)
+                {
+                    display += selectedNumbers[i].ToString();
+                    
+                    if (i < selectedOperators.Count)
+                    {
+                        display += " " + selectedOperators[i] + " ";
+                    }
+                    else if (i < selectedNumbers.Count - 1)
+                    {
+                        display += " _ ";
+                    }
+                }
+                
+                // If we need more numbers
+                if (selectedNumbers.Count <= selectedOperators.Count)
+                {
+                    display += " _";
+                }
+                
+                display += " = ?";
+            }
             else
-                display += "_";
+            {
+                // Original display logic
+                if (hasFirstNumber)
+                    display += firstNumber.ToString();
+                else
+                    display += "_";
 
-            display += " ";
+                display += " ";
 
-            if (hasSelectedOperator)
-                display += selectedOperator;
-            else
-                display += "_";
+                if (hasSelectedOperator)
+                    display += selectedOperator;
+                else
+                    display += "_";
 
-            display += " ";
+                display += " ";
 
-            if (hasSecondNumber)
-                display += secondNumber.ToString();
-            else
-                display += "_";
+                if (hasSecondNumber)
+                    display += secondNumber.ToString();
+                else
+                    display += "_";
 
-            display += " = ?";
+                display += " = ?";
+            }
 
             selectionText.text = display;
         }
@@ -241,53 +344,106 @@ public class GameManager : MonoBehaviour
     {
         if (HasValidSelection)
         {
-            int result = CalculateResult(firstNumber, selectedOperator, secondNumber);
-            Debug.Log($"Complete equation: {firstNumber} {selectedOperator} {secondNumber} = {result}");
+            if (isLongEquationMode)
+            {
+                int result = CalculateLongEquationResult();
+                Debug.Log($"Complete long equation result: {result}");
+            }
+            else
+            {
+                int result = CalculateResult(firstNumber, selectedOperator, secondNumber);
+                Debug.Log($"Complete equation: {firstNumber} {selectedOperator} {secondNumber} = {result}");
+            }
         }
     }
     
-    // Updated method - now only takes the target result from bubble
+    // Updated method - now handles both simple and long equations
     public bool CheckAnswer(int bubbleTargetResult)
     {
         if (!HasValidSelection)
         {
-            Debug.Log("Please select two numbers and an operator first!");
-            score -= 1; // Penalize for invalid selection
+            Debug.Log("Please complete your equation first!");
+            int penalty = isLongEquationMode ? selectedNumbers.Count : 1;
+            score -= penalty;
             UpdateUI();
             return false;
-            
         }
         
-        int calculatedResult = CalculateResult(firstNumber, selectedOperator, secondNumber);
+        int calculatedResult;
+        int equationLength;
         
-        Debug.Log($"Checking: {firstNumber} {selectedOperator} {secondNumber} = {calculatedResult} vs target {bubbleTargetResult}");
+        if (isLongEquationMode)
+        {
+            calculatedResult = CalculateLongEquationResult();
+            equationLength = selectedNumbers.Count + selectedOperators.Count;
+            Debug.Log($"Checking long equation result: {calculatedResult} vs target {bubbleTargetResult}");
+        }
+        else
+        {
+            calculatedResult = CalculateResult(firstNumber, selectedOperator, secondNumber);
+            equationLength = 3; // number + operator + number
+            Debug.Log($"Checking: {firstNumber} {selectedOperator} {secondNumber} = {calculatedResult} vs target {bubbleTargetResult}");
+        }
         
         if (calculatedResult == bubbleTargetResult)
         {
-            score += 10;
+            // Points based on equation length
+            int points = isLongEquationMode ? (equationLength * 5) : 10;
+            score += points;
             ResetSelection();
             UpdateUI();
             UpdateSelectionDisplay();
-            Debug.Log("Correct answer! +10 points");
+            Debug.Log($"Correct answer! +{points} points (Length bonus: {equationLength})");
             
-            // Trigger tile regeneration
-            DynamicTileManager tileManager = FindFirstObjectByType<DynamicTileManager>();
-            if (tileManager != null)
+            // Trigger tile regeneration only if auto-reset is enabled
+            if (SettingsManager.Instance == null || SettingsManager.Instance.IsAutoResetTilesEnabled())
             {
-                tileManager.GenerateRandomTiles();
+                DynamicTileManager tileManager = FindFirstObjectByType<DynamicTileManager>();
+                if (tileManager != null)
+                {
+                    tileManager.GenerateRandomTiles();
+                }
             }
             
             return true;
         }
         else
         {   
-            score -= 5;
+            // Penalty based on equation length
+            int penalty = isLongEquationMode ? (equationLength * 2) : 5;
+            score -= penalty;
             ResetSelection();
             UpdateUI();
             UpdateSelectionDisplay();
-            Debug.Log("Wrong answer! -5 points");
+            Debug.Log($"Wrong answer! -{penalty} points (Length penalty: {equationLength})");
             return false;
         }
+    }
+    
+    int CalculateLongEquationResult()
+    {
+        if (selectedNumbers.Count == 0) return 0;
+        
+        int result = selectedNumbers[0];
+        
+        for (int i = 0; i < selectedOperators.Count && i + 1 < selectedNumbers.Count; i++)
+        {
+            string op = selectedOperators[i];
+            int nextNumber = selectedNumbers[i + 1];
+            
+            switch (op)
+            {
+                case "+": result += nextNumber; break;
+                case "-": result -= nextNumber; break;
+                case "*": result *= nextNumber; break;
+                case "/": result = nextNumber != 0 ? result / nextNumber : result; break;
+                default: 
+                    Debug.LogWarning($"Unknown operator: {op}");
+                    break;
+            }
+        }
+        
+        return result;
     }
     
     int CalculateResult(int num1, string op, int num2)
@@ -327,12 +483,16 @@ public class GameManager : MonoBehaviour
     
     void ResetSelection()
     {
+        // Reset both systems
         hasFirstNumber = false;
         hasSecondNumber = false;
         hasSelectedOperator = false;
         firstNumber = 0;
         secondNumber = 0;
         selectedOperator = "";
+        
+        selectedNumbers.Clear();
+        selectedOperators.Clear();
     }
     
     public void ManualResetSelection()
@@ -367,9 +527,32 @@ public class GameManager : MonoBehaviour
         score = 0;
         gameOver = false;
         ResetSelection();
-        InitializeHearts(); // Use InitializeHearts instead of CreateHearts
+        InitializeHearts();
         UpdateUI();
         UpdateSelectionDisplay();
         Debug.Log("Game restarted!");
+    }
+    
+    // Public method to get current equation length (for external scripts)
+    public int GetCurrentEquationLength()
+    {
+        if (isLongEquationMode)
+        {
+            return selectedNumbers.Count + selectedOperators.Count;
+        }
+        else
+        {
+            int length = 0;
+            if (hasFirstNumber) length++;
+            if (hasSelectedOperator) length++;
+            if (hasSecondNumber) length++;
+            return length;
+        }
+    }
+    
+    // Public method to check if long equation mode is active
+    public bool IsLongEquationMode()
+    {
+        return isLongEquationMode;
     }
 }

@@ -7,7 +7,7 @@ public class DynamicTileManager : MonoBehaviour
 {
     [Header("Tile Configuration")]
     public Tile[] allTiles;
-    public int visibleTileCount = 10;
+    public int visibleTileCount = 11;
     
     [Header("Content Generation")]
     public int minNumber = 1;
@@ -16,16 +16,17 @@ public class DynamicTileManager : MonoBehaviour
     
     [Header("Reset Settings")]
     public Button resetButton;
-    public float autoResetTime = 30f;
+    public float autoResetTime = 45f;
     
     [Header("Smart Tile Generation")]
     public bool generateHelpfulTiles = true;
     [Range(0f, 1f)]
-    public float helpfulTileChance = 0.8f; // 60% chance to generate helpful tiles
+    public float helpfulTileChance = 0.9f; // 90% chance to generate helpful tiles
     
     private List<Tile> activeTiles = new List<Tile>();
     private List<int> currentBubbleTargets = new List<int>();
     private float lastResetTime;
+    private bool autoResetEnabled = true; // Cache the setting
     
     void Start()
     {
@@ -42,11 +43,18 @@ public class DynamicTileManager : MonoBehaviour
         
         GenerateRandomTiles();
         lastResetTime = Time.time;
+        
+        // Initialize auto-reset setting
+        UpdateAutoResetSetting();
     }
     
     void Update()
     {
-        if (Time.time - lastResetTime > autoResetTime)
+        // Update auto-reset setting
+        UpdateAutoResetSetting();
+        
+        // Only do auto-reset if it's enabled
+        if (autoResetEnabled && Time.time - lastResetTime > autoResetTime)
         {
             ResetTiles();
         }
@@ -54,6 +62,25 @@ public class DynamicTileManager : MonoBehaviour
         if (generateHelpfulTiles)
         {
             UpdateBasedOnBubbles();
+        }
+    }
+    
+    void UpdateAutoResetSetting()
+    {
+        if (SettingsManager.Instance != null)
+        {
+            bool newAutoResetEnabled = SettingsManager.Instance.IsAutoResetTilesEnabled();
+            if (newAutoResetEnabled != autoResetEnabled)
+            {
+                autoResetEnabled = newAutoResetEnabled;
+                Debug.Log($"Auto-reset tiles setting changed to: {autoResetEnabled}");
+                
+                // Reset the timer when the setting changes
+                if (autoResetEnabled)
+                {
+                    lastResetTime = Time.time;
+                }
+            }
         }
     }
     
@@ -292,8 +319,8 @@ public class DynamicTileManager : MonoBehaviour
             currentBubbleTargets = newBubbleTargets;
             Debug.Log($"Bubble targets changed: {string.Join(", ", currentBubbleTargets)}");
             
-            // 40% chance to regenerate some tiles when bubbles change
-            if (Random.Range(0f, 1f) < 0.4f)
+            // 40% chance to regenerate some tiles when bubbles change (only if auto-reset is enabled)
+            if (autoResetEnabled && Random.Range(0f, 1f) < 0.4f)
             {
                 RegenerateSomeTiles();
             }
@@ -424,5 +451,11 @@ public class DynamicTileManager : MonoBehaviour
     public List<int> GetCurrentBubbleTargets()
     {
         return new List<int>(currentBubbleTargets);
+    }
+    
+    // Public method to check if auto-reset is currently enabled
+    public bool IsAutoResetEnabled()
+    {
+        return autoResetEnabled;
     }
 }

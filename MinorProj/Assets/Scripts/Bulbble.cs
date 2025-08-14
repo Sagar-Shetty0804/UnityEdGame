@@ -9,7 +9,7 @@ public class Bubble : MonoBehaviour
     public int targetResult; // The number players need to create an equation for
     
     [Header("Movement")]
-    public float fallSpeed = 5f;
+    public float fallSpeed = 3f;
     
     [Header("Visual Effects")]
     public float popAnimationDuration = 0.2f;
