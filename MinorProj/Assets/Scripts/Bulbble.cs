@@ -5,6 +5,8 @@ using System.Collections;
 
 public class Bubble : MonoBehaviour
 {
+    public AudioClip popSound;  // assign in Inspector
+
     [Header("Bubble Data")]
     public int targetResult; // The number players need to create an equation for
     
@@ -120,7 +122,7 @@ public class Bubble : MonoBehaviour
             transform.localScale = Vector3.Lerp(startScale, endScale, progress);
             yield return null;
         }
-        
+        AudioSource.PlayClipAtPoint(popSound, transform.position);
         Destroy(gameObject);
     }
     
