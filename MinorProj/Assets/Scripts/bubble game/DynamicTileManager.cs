@@ -7,11 +7,11 @@ public class DynamicTileManager : MonoBehaviour
 {
     [Header("Tile Configuration")]
     public Tile[] allTiles;
-    public int visibleTileCount = 11;
+    public int visibleTileCount = 15;
     
     [Header("Content Generation")]
     public int minNumber = 1;
-    public int maxNumber = 15;
+    public int maxNumber = 11;
     public string[] availableOperators = {"+", "-", "*"};
     
     [Header("Reset Settings")]
@@ -423,7 +423,20 @@ public class DynamicTileManager : MonoBehaviour
     {
         minNumber = minNum;
         maxNumber = maxNum;
+        
+        // Store the current time scale
+        float originalTimeScale = Time.timeScale;
+        
+        // Temporarily set time scale to 1 to allow operations to complete
+        if (Time.timeScale == 0)
+        {
+            Time.timeScale = 1f;
+        }
+        
         ResetTiles();
+        
+        // Restore the original time scale (don't force it to 1 if it was 0 for a reason)
+        Time.timeScale = originalTimeScale;
     }
     
     public void SetHelpfulTileChance(float chance)

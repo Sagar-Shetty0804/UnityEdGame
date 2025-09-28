@@ -363,7 +363,7 @@ public class GameManager : MonoBehaviour
         if (!HasValidSelection)
         {
             Debug.Log("Please complete your equation first!");
-            int penalty = isLongEquationMode ? selectedNumbers.Count : 1;
+            int penalty = isLongEquationMode ? selectedNumbers.Count + 1 : 1;
             score -= penalty;
             UpdateUI();
             return false;
@@ -388,7 +388,7 @@ public class GameManager : MonoBehaviour
         if (calculatedResult == bubbleTargetResult)
         {
             // Points based on equation length
-            int points = isLongEquationMode ? (equationLength * 5) : 10;
+            int points = isLongEquationMode ? (equationLength * 3) : 10;
             score += points;
             ResetSelection();
             UpdateUI();
@@ -410,7 +410,7 @@ public class GameManager : MonoBehaviour
         else
         {   
             // Penalty based on equation length
-            int penalty = isLongEquationMode ? (equationLength * 2) : 5;
+            int penalty = isLongEquationMode ? (equationLength * 5) : 5;
             score -= penalty;
             ResetSelection();
             UpdateUI();

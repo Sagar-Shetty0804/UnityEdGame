@@ -19,10 +19,12 @@ public class BubbleSpawner : MonoBehaviour
     public int minNumber = 2; // Minimum number for better gameplay
     
     [Header("Difficulty-based Fall Speeds")]
-    public float lowDifficultySpeed = 15f;      // Slow fall speed for Low difficulty
-    public float mediumDifficultySpeed = 25f;   // Medium fall speed for Medium difficulty
+    public float lowDifficultySpeed = 20f;      // Slow fall speed for Low difficulty
+    public float mediumDifficultySpeed = 30f;   // Medium fall speed for Medium difficulty
     public float highDifficultySpeed = 40f;     // Fast fall speed for High difficulty
-    public float speedVariation = 5f;           // Random variation in fall speed
+    public float speedVariation = 9f;           // Random variation in fall speed
+
+    public float ScreenRatio => bubbleCanvas != null ? bubbleCanvas.rect.height / bubbleCanvas.rect.width : 1f;
     
     [Header("Smart Target Generation")]
     public bool useSmartTargets = true; // Generate targets based on available tiles
@@ -106,16 +108,16 @@ public class BubbleSpawner : MonoBehaviour
         switch (currentDifficulty)
         {
             case 0: // Low
-                baseSpeed = lowDifficultySpeed;
+                baseSpeed = ScreenRatio * lowDifficultySpeed;
                 break;
             case 1: // Medium
-                baseSpeed = mediumDifficultySpeed;
+                baseSpeed = ScreenRatio * mediumDifficultySpeed;
                 break;
             case 2: // High
-                baseSpeed = highDifficultySpeed;
+                baseSpeed = ScreenRatio * highDifficultySpeed;
                 break;
             default:
-                baseSpeed = mediumDifficultySpeed;
+                baseSpeed = ScreenRatio * mediumDifficultySpeed;
                 break;
         }
         

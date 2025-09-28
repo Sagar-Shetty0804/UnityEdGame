@@ -98,7 +98,7 @@ public class Bubble : MonoBehaviour
         else
         {   
             Debug.Log("Incorrect equation! Bubble will shake instead.");
-
+            // Play shake animation instead of popping
             StartCoroutine(ShakeAnimation());
         }
     }
