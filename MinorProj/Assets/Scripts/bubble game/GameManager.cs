@@ -14,14 +14,19 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
     
     [Header("Current Selection Display")]
-    public TextMeshProUGUI selectionText; // Add this to show current equation
+    public TextMeshProUGUI selectionText;
     
     [Header("Hearts System")]
-    public Transform heartsContainer; // Drag your HeartsContainer here
-    public GameObject heartPrefab; // Drag your heart prefab here
-    public Image redFlashOverlay; // Drag your red overlay here
-    public float flashDuration = 0.5f; // How long the red flash lasts
-    public float flashIntensity = 0.3f; // How red the flash gets (0-1)
+    public Transform heartsContainer;
+    public GameObject heartPrefab;
+    public Image redFlashOverlay;
+    public float flashDuration = 0.5f;
+    public float flashIntensity = 0.3f;
+    
+    [Header("Game Over Panel")]
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI finalScoreText;
+    public Button restartButton;
     
     [Header("Game State")]
     public bool gameOver = false;
@@ -41,7 +46,7 @@ public class GameManager : MonoBehaviour
     private bool hasSecondNumber = false;
     private bool hasSelectedOperator = false;
     
-    private List<GameObject> heartObjects = new List<GameObject>(); // Keep track of heart objects
+    private List<GameObject> heartObjects = new List<GameObject>();
     
     public static GameManager Instance;
     
@@ -92,7 +97,19 @@ public class GameManager : MonoBehaviour
             Color flashColor = redFlashOverlay.color;
             flashColor.a = 0;
             redFlashOverlay.color = flashColor;
-            redFlashOverlay.gameObject.SetActive(true); // Make sure it's active
+            redFlashOverlay.gameObject.SetActive(true);
+        }
+        
+        // Initialize Game Over Panel
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        // Setup restart button listener
+        if (restartButton != null)
+        {
+            restartButton.onClick.AddListener(RestartGame);
         }
     }
 
@@ -111,7 +128,7 @@ public class GameManager : MonoBehaviour
             if (newLongEquationMode != isLongEquationMode)
             {
                 isLongEquationMode = newLongEquationMode;
-                ResetSelection(); // Reset when mode changes
+                ResetSelection();
                 UpdateSelectionDisplay();
                 Debug.Log($"Long equation mode: {isLongEquationMode}");
             }
@@ -137,7 +154,7 @@ public class GameManager : MonoBehaviour
         }
         
         // If we don't have enough hearts, create more
-        while (heartObjects.Count < 3) // Always ensure we have at least 3 hearts
+        while (heartObjects.Count < 3)
         {
             if (heartPrefab != null && heartsContainer != null)
             {
@@ -162,10 +179,8 @@ public class GameManager : MonoBehaviour
         {
             if (heartObjects[i] != null)
             {
-                // Show heart if index is less than current lives
                 bool shouldShow = i < lives;
                 heartObjects[i].SetActive(shouldShow);
-                
                 Debug.Log($"Heart {i}: {(shouldShow ? "Active" : "Inactive")} (Lives: {lives})");
             }
         }
@@ -182,13 +197,13 @@ public class GameManager : MonoBehaviour
         Debug.Log("Starting red flash effect");
         
         Color originalColor = redFlashOverlay.color;
-        Color flashColor = Color.red; // Use pure red
+        Color flashColor = Color.red;
         
         // Fade in red
         float elapsed = 0;
         while (elapsed < flashDuration / 2)
         {
-            elapsed += Time.unscaledDeltaTime; // Use unscaled time in case game is paused
+            elapsed += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(0, flashIntensity, elapsed / (flashDuration / 2));
             flashColor.a = alpha;
             redFlashOverlay.color = flashColor;
@@ -217,13 +232,11 @@ public class GameManager : MonoBehaviour
     {
         if (isLongEquationMode)
         {
-            // Long equation mode: can add unlimited numbers
             selectedNumbers.Add(number);
             Debug.Log($"Added number to long equation: {number} (Total numbers: {selectedNumbers.Count})");
         }
         else
         {
-            // Original logic for simple equations
             if (!hasFirstNumber)
             {
                 firstNumber = number;
@@ -238,7 +251,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // If both numbers are selected, replace the first one and shift
                 firstNumber = secondNumber;
                 secondNumber = number;
                 Debug.Log($"Replaced numbers - First: {firstNumber}, Second: {number}");
@@ -253,7 +265,6 @@ public class GameManager : MonoBehaviour
     {
         if (isLongEquationMode)
         {
-            // Long equation mode: can add operators if we have at least one number
             if (selectedNumbers.Count > selectedOperators.Count)
             {
                 selectedOperators.Add(op);
@@ -266,7 +277,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Original logic
             selectedOperator = op;
             hasSelectedOperator = true;
             Debug.Log($"Selected operator: {op}");
@@ -284,7 +294,6 @@ public class GameManager : MonoBehaviour
 
             if (isLongEquationMode)
             {
-                // Display long equation
                 for (int i = 0; i < selectedNumbers.Count; i++)
                 {
                     display += selectedNumbers[i].ToString();
@@ -299,7 +308,6 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 
-                // If we need more numbers
                 if (selectedNumbers.Count <= selectedOperators.Count)
                 {
                     display += " _";
@@ -309,7 +317,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Original display logic
                 if (hasFirstNumber)
                     display += firstNumber.ToString();
                 else
@@ -357,7 +364,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // Updated method - now handles both simple and long equations
     public bool CheckAnswer(int bubbleTargetResult)
     {
         if (!HasValidSelection)
@@ -381,13 +387,12 @@ public class GameManager : MonoBehaviour
         else
         {
             calculatedResult = CalculateResult(firstNumber, selectedOperator, secondNumber);
-            equationLength = 3; // number + operator + number
+            equationLength = 3;
             Debug.Log($"Checking: {firstNumber} {selectedOperator} {secondNumber} = {calculatedResult} vs target {bubbleTargetResult}");
         }
         
         if (calculatedResult == bubbleTargetResult)
         {
-            // Points based on equation length
             int points = isLongEquationMode ? (equationLength * 3) : 10;
             score += points;
             ResetSelection();
@@ -395,7 +400,6 @@ public class GameManager : MonoBehaviour
             UpdateSelectionDisplay();
             Debug.Log($"Correct answer! +{points} points (Length bonus: {equationLength})");
             
-            // Trigger tile regeneration only if auto-reset is enabled
             if (SettingsManager.Instance == null || SettingsManager.Instance.IsAutoResetTilesEnabled())
             {
                 DynamicTileManager tileManager = FindFirstObjectByType<DynamicTileManager>();
@@ -409,7 +413,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {   
-            // Penalty based on equation length
             int penalty = isLongEquationMode ? (equationLength * 5) : 5;
             score -= penalty;
             ResetSelection();
@@ -467,12 +470,8 @@ public class GameManager : MonoBehaviour
         lives--;
         Debug.Log($"Life lost! Lives remaining: {lives}");
         
-        // Update hearts display
         UpdateHearts();
-        
-        // Trigger red flash effect
         StartCoroutine(RedFlashEffect());
-        
         UpdateUI();
         
         if (lives <= 0)
@@ -483,7 +482,6 @@ public class GameManager : MonoBehaviour
     
     void ResetSelection()
     {
-        // Reset both systems
         hasFirstNumber = false;
         hasSecondNumber = false;
         hasSelectedOperator = false;
@@ -516,12 +514,48 @@ public class GameManager : MonoBehaviour
         gameOver = true;
         Debug.Log($"Game Over! Final Score: {score}");
         
-        // Stop time or disable game elements
+        // Stop time FIRST before showing panel
         Time.timeScale = 0;
+        
+        // Display game over panel
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            Debug.Log("Game Over Panel activated");
+        }
+        else
+        {
+            Debug.LogWarning("Game Over Panel is not assigned!");
+        }
+        
+        // Display final score
+        if (finalScoreText != null)
+        {
+            finalScoreText.text = "Final Score: " + score;
+            Debug.Log($"Final score displayed: {score}");
+        }
+        else
+        {
+            Debug.LogWarning("Final Score Text is not assigned!");
+        }
+        
+        // Log button status
+        if (restartButton != null)
+        {
+            Debug.Log($"Restart button interactable: {restartButton.interactable}");
+            Debug.Log($"Restart button active: {restartButton.gameObject.activeInHierarchy}");
+        }
     }
     
     public void RestartGame()
     {
+        // Hide game over panel
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        // Reset game state
         Time.timeScale = 1;
         lives = 3;
         score = 0;
@@ -530,10 +564,10 @@ public class GameManager : MonoBehaviour
         InitializeHearts();
         UpdateUI();
         UpdateSelectionDisplay();
+        
         Debug.Log("Game restarted!");
     }
     
-    // Public method to get current equation length (for external scripts)
     public int GetCurrentEquationLength()
     {
         if (isLongEquationMode)
@@ -550,7 +584,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // Public method to check if long equation mode is active
     public bool IsLongEquationMode()
     {
         return isLongEquationMode;
