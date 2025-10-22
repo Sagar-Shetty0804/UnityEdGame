@@ -137,7 +137,7 @@ MonoBehaviour:
   popSound: {fileID: 8300000, guid: be5caf78171de5b4b8fd3723984d14d1, type: 3}
   targetResult: 0
   fallSpeed: 2
-  popAnimationDuration: 0.2
+  popAnimationDuration: 5
   shakeIntensity: 0.1
   shakeDuration: 0.3
   scoreText: {fileID: 0}
