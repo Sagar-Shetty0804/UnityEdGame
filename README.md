@@ -1,5 +1,8 @@
 # 🎮 EduQuest – Educational Game Platform
-**EduQuest** is an interactive **educational game platform** developed as a **Third-Year Minor Project** under *Project Based Learning: Minor Project–I* for the academic year **2025–2026**. The platform is designed to make learning more **engaging, interactive, and enjoyable** for school students by integrating curriculum-based concepts with game mechanics.
+**EduQuest** is an interactive **educational game platform** developed as a **Third-Year Minor Project** 
+under *Project Based Learning: Minor Project–I* for the academic year **2025–2026**. The platform is 
+designed to make learning more **engaging, interactive, and enjoyable** for school students by integrating 
+curriculum-based concepts with game mechanics.
 
 ---
 
@@ -20,10 +23,10 @@ Traditional learning methods often rely heavily on textbooks and rote memorizati
 ---
 
 ## 🏠 Home Page
-The home page acts as a central hub that allows users to select and navigate between the three educational games.
+<p align="center">The home page acts as a central hub that allows users to select and navigate between the three educational games.</p>
 
 <p align="center">
-  <img src="screenshots/homepage.png" alt="EduQuest Home Page" width="800">
+  <img src="screenshots/homepage.png" alt="EduQuest Home Page" width="600">
 </p>
 
 ---
@@ -31,26 +34,26 @@ The home page acts as a central hub that allows users to select and navigate bet
 ## 🎮 Games Included
 
 ### 🧮 Math Bubble Bash
-A mathematics-based game designed to strengthen **arithmetic and logical reasoning skills** through interactive challenges.
+<p align = "center"> A mathematics-based game designed to strengthen arithmetic and logical reasoning skills through interactive challenges. </p>
 
 **Gameplay:**
-- Math questions are displayed on screen  
+- Math questions are formed using operators present on screen  
 - Multiple bubbles appear with possible answers  
 - Players pop the correct bubbles to form valid equations  
 - Score and lives are tracked in real time  
 
 <p align="center">
-  <img src="screenshots/bubblebash1.png" alt="Math Bubble Bash Main Screen" width="800">
+  <img src="screenshots/bubblebash1.png" alt="Math Bubble Bash Main Screen" width="600">
 </p>
 
 <p align="center">
-  <img src="screenshots/bubblebash2.png" alt="Math Bubble Bash Game Over Screen" width="800">
+  <img src="screenshots/bubblebash2.png" alt="Math Bubble Bash Game Over Screen" width="600">
 </p>
 
 ---
 
 ### 🐦 Flappy Bird Quiz
-A quiz-based game inspired by Flappy Bird mechanics, focused on **general knowledge, recall, and decision-making**.
+<p align="center"> A quiz-based game inspired by Flappy Bird mechanics, focused on general knowledge, recall, and decision-making. </p>
 
 **Gameplay:**
 - Players control a bird to navigate obstacles  
@@ -59,17 +62,17 @@ A quiz-based game inspired by Flappy Bird mechanics, focused on **general knowle
 - Incorrect answers or collisions end the game  
 
 <p align="center">
-  <img src="screenshots/flappybird1.png" alt="Flappy Bird Quiz Main Screen" width="800">
+  <img src="screenshots/flappybird1.png" alt="Flappy Bird Quiz Main Screen" width="600">
 </p>
 
 <p align="center">
-  <img src="screenshots/flappybird2.png" alt="Flappy Bird Quiz Game Over Screen" width="800">
+  <img src="screenshots/flappybird2.png" alt="Flappy Bird Quiz Game Over Screen" width="600">
 </p>
 
 ---
 
 ### 🌍 GeoMap (Geography Mapper)
-An interactive geography game that enhances **spatial awareness and memory** through map-based learning.
+<p align="center">An interactive geography game that enhances spatial awareness and memory through map-based learning.</p>
 
 **Gameplay:**
 - A map is displayed with unlabeled regions  
@@ -78,11 +81,11 @@ An interactive geography game that enhances **spatial awareness and memory** thr
 - Completion message confirms success  
 
 <p align="center">
-  <img src="screenshots/geomap1.png" alt="GeoMap Main Screen" width="800">
+  <img src="screenshots/geomap1.png" alt="GeoMap Main Screen" width="600">
 </p>
 
 <p align="center">
-  <img src="screenshots/geomap2.png" alt="GeoMap Completion Screen" width="800">
+  <img src="screenshots/geomap2.png" alt="GeoMap Completion Screen" width="600">
 </p>
 
 ---
@@ -101,8 +104,8 @@ An interactive geography game that enhances **spatial awareness and memory** thr
 
 🟡 **Currently Paused**
 
-Development on EduQuest is **temporarily paused** due to semester transition and academic requirements.  
-The existing implementation represents a **completed and evaluated minor project**, and serves as a foundation for future enhancements.
+Development on EduQuest is **temporarily paused** due to semester transition and academic requirements. The existing <br>
+implementation represents a **completed and evaluated minor project**, and serves as a foundation for future enhancements.
 
 ---
 
@@ -132,5 +135,3 @@ This project was developed **strictly for academic and educational purposes** as
 All content is intended for learning and demonstration only.
 
 ---
-
-<p align="center"><i>learning through play • education made interactive</i></p>
