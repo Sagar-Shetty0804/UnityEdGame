@@ -17,4 +17,10 @@ public class SceneLoader : MonoBehaviour
             Debug.LogError("Scene name to load is not set on the button!");
         }
     }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quit game button pressed!");
+        Application.Quit();
+    }
 }

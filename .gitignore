@@ -32,3 +32,7 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
+
+# Unity User-specific files
+UserSettings/
+**/UserSettings/
